@@ -1,7 +1,7 @@
-#!/usr/bin/env perl
+  #!/usr/bin/env perl
 use Mojolicious::Lite -signatures;
 
-helper release_search => sub ($c, $status, $maturity, $size = 3, $rc = undef) {
+helper release_search => sub ($c, $maturity, $size = 3, $rc = undef) {
   +[
     map { $_->{fields} } $c->ua->post('https://fastapi.metacpan.org/v1/release/_search',
     json => {
@@ -17,7 +17,6 @@ helper release_search => sub ($c, $status, $maturity, $size = 3, $rc = undef) {
       filter => {
         and => [
           {term => {'distribution.lowercase' => 'perl'}},
-          {term => {status => $status}},
           {term => {maturity => $maturity}},
         ]
       },
@@ -33,15 +32,15 @@ get '/' => sub ($c) {
 under '/v1';
 
 get '/stable' => sub ($c) {
-  $c->render(json => $c->release_search('latest', 'released'));
+  $c->render(json => $c->release_search('released'));
 };
 
 get '/devel' => sub ($c) {
-  $c->render(json => $c->release_search('cpan', 'developer', 1));
+  $c->render(json => $c->release_search('developer', 1));
 };
 
 get '/testing' => sub ($c) {
-  $c->render(json => $c->release_search('cpan', 'developer', 1, 'rc'));
+  $c->render(json => $c->release_search('developer', 1, 'rc'));
 };
 
 app->start;
